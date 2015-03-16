@@ -8,7 +8,7 @@ use JSON::PP;
 use POSIX qw(pause);
 use Time::HiRes qw(setitimer ITIMER_REAL);
 
-my $VERSION = "0.01";
+my $VERSION = "0.02";
 my $usage = "Usage: $0 [-v] host operation(logon|values) [-f format(csv)] [-h] [-i] [-p] [-t] [-u] [-d]\n";
 
 GetOptions(
@@ -40,7 +40,7 @@ my %operation = (
       die if ( !$opt_daemon );
       return 1;
     }
-    my $values = ${ decode_json( $response->content ) }{ 'report' };
+    my $values = eval { ${ decode_json( $response->content ) }{ 'report' } } || undef;
     if ( !defined( $values ) ) {
       print STDERR POSIX::strftime( "%FT%T%z ", localtime ) . $response->content . "\n";
       die if ( !$opt_daemon );
