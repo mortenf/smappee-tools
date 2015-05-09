@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 
-import os
-from ConfigParser import SafeConfigParser
+import sys, os, requests, datetime, re
 import paho.mqtt.publish as publish
-import requests
+from ConfigParser import SafeConfigParser
 from daemon import runner
-import datetime
-import re
+from time import sleep
 
 class SmappeeMQTT():
     def __init__(self, smappee):
@@ -25,7 +23,14 @@ class SmappeeMQTT():
     def run(self):
         reline = re.compile("<BR>\s*(\S+=.+?)<BR>")
         refield = re.compile(",\s+")
+        last = None
         while True:
+            while True:
+                now = datetime.datetime.utcnow().second
+                if last != now:
+                    last = now
+                    break
+                sleep(0.1)
             try:
                 response = requests.get("http://"+self.smappee+"/gateway/apipublic/reportInstantaneousValues")
                 report = response.json()["report"]
@@ -44,5 +49,4 @@ def main(argv=None):
     daemon_runner.do_action()
 
 if __name__ == "__main__":
-    main()
-
+    main(sys.argv)
