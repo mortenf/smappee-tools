@@ -7,13 +7,21 @@ from daemon import runner
 from time import sleep
 
 class SmappeeMQTT():
-    def __init__(self, smappee):
-        self.smappee = smappee
-        self.host = "localhost"
-        self.port = 1883
-        self.topic = "smappee/csv"
-        self.qos = 0
-        self.retain = False
+    def __init__(self):
+        cfg = SafeConfigParser({"client_id": "smappee-mqtt-"+str(os.getpid()), "hostname": "localhost", "port": "1883", "auth": "False", "retain": "False", "qos": "0"})
+        cfg.optionxform = str
+        cfg.read("smappee-mqtt.conf")
+        self.smappee = cfg.get("smappee", "hostname")
+        self.client_id = cfg.get("mqtt", "client_id")
+        self.host = cfg.get("mqtt", "hostname")
+        self.port = eval(cfg.get("mqtt", "port"))
+        self.topic = cfg.get("mqtt", "topic")
+        self.qos = eval(cfg.get("mqtt", "qos"))
+        self.retain = eval(cfg.get("mqtt", "retain"))
+        if eval(cfg.get("mqtt", "auth")):
+            self.auth = { "username": cfg.get("mqtt", "user"), "password": cfg.get("mqtt", "password") }
+        else:
+            self.auth = None
         self.stdin_path = '/dev/null'
         self.stdout_path = '/dev/tty'
         self.stderr_path = '/dev/tty'
@@ -39,12 +47,12 @@ class SmappeeMQTT():
                     for field in re.split(refield, line):
                         payload += ","+field
                 msgs = [ { "topic": self.topic, "payload": payload, "qos": self.qos, "retain": self.retain } ]
-                publish.multiple(msgs, hostname=self.host, port=self.port, client_id="smappee-mqtt-"+str(os.getpid()))
+                publish.multiple(msgs, hostname=self.host, port=self.port, client_id=self.client_id, auth=self.auth)
             except Exception, e:
                 pass
 
 def main(argv=None):
-    daemon = SmappeeMQTT("smappee")
+    daemon = SmappeeMQTT()
     daemon_runner = runner.DaemonRunner(daemon)
     daemon_runner.do_action()
 
