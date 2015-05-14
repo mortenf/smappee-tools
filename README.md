@@ -41,12 +41,30 @@ Vrms,A,W,var,VA,,,,,A,W,var,VA,,,,,A,W,var,VA,,,,
 
 ## smappee-mqtt.py
 
-A daemon script that publishes the current power consumption status variables to an MQTT broker.
+A daemon script that publishes the current power consumption status variables to an MQTT broker every second.
+Authorization must be handled externally, e.g. by running the above Nagios check every 5 minutes or so.
 
 ### Usage
 
 ```bash
 ./smappee-mqtt.py start
+```
+
+### Sample Configuration
+
+```
+[smappee]
+hostname = smappee
+
+[mqtt]
+hostname = localhost
+port = 1883
+topic = device/smappee/in/raw
+qos = 0
+retain = False
+auth = True
+user = test
+password = test
 ```
 
 ### Sample Payload
