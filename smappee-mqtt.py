@@ -16,6 +16,7 @@ class SmappeeMQTT():
         self.host = cfg.get("mqtt", "hostname")
         self.port = eval(cfg.get("mqtt", "port"))
         self.topic = cfg.get("mqtt", "topic")
+        self.topic_json = cfg.get("mqtt", "topic_json")
         self.qos = eval(cfg.get("mqtt", "qos"))
         self.delay = eval(cfg.get("mqtt", "delay"))
         self.retain = eval(cfg.get("mqtt", "retain"))
@@ -69,7 +70,7 @@ class SmappeeMQTT():
                 JsonPayload = JsonPayload.replace(",\"cu","\"cu")
                 JsonPayload = JsonPayload.replace(" var","")
 
-                msgs = [ { "topic": "device/smappee/in/json", "payload": JsonPayload, "qos": self.qos, "retain": self.retain } ]
+                msgs = [ { "topic": self.topic_json, "payload": JsonPayload, "qos": self.qos, "retain": self.retain } ]
                 publish.multiple(msgs, hostname=self.host, port=self.port, client_id=self.client_id, auth=self.auth)
 
                 msgs = [ { "topic": self.topic, "payload": payload, "qos": self.qos, "retain": self.retain } ]
