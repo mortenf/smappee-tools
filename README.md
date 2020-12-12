@@ -61,6 +61,7 @@ hostname = smappee
 hostname = localhost
 port = 1883
 topic = device/smappee/in/raw
+topic_json = device/smappee/in/json
 qos = 0
 delay = 0.6
 retain = False
