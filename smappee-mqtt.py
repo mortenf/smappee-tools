@@ -59,7 +59,7 @@ class SmappeeMQTT():
 
                 #old version
                 JsonPayload = "{\"elmaalerObject\": {" + payloadJ + "}]}}"
-                #new version, lavet i xcode d. 12/12-2020
+                #new version, not using the elmaalerObject. Change to make a simpler structure
                 #JsonPayload = "{" + payloadJ + "}]}"
                 JsonPayload = JsonPayload.replace("=","\":")
                 JsonPayload = JsonPayload.replace(" Vrms","")
