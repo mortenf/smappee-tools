@@ -69,11 +69,19 @@ user = test
 password = test
 ```
 
-### Sample Payload
+### Sample Raw Payload
 
 ```
 time=2015-05-07T21:48:44.047870Z,voltage=235.4 Vrms,current=1.456 A,activePower=309.015 W,reactivePower=148.588 var,apparentPower=342.883 VA,cosfi=90,quadrant=0,phaseshift=0.0,phaseDiff=0.0,current=0.007 A,activePower=1.442 W,reactivePower=0.82 var,apparentPower=1.659 VA,cosfi=60,quadrant=0,phaseshift=0.0,phaseDiff=0.0,current=0.454 A,activePower=105.698 W,reactivePower=16.44 var,apparentPower=106.969 VA,cosfi=98,quadrant=0,phaseshift=0.0,phaseDiff=0.0
 ```
+
+
+### Sample JSON Payload
+
+```
+{"time":"2020-12-12T19:25:21.401288Z","voltage":232.5,"phase": [{"current":3.948 ,"activePower":915.89,"reactivePower":64.509,"apparentPower":918.159,"cosfi":99,"quadrant":0,"phaseshift":0.0,"phaseDiff":0.0},{"current":11.451 ,"activePower":2663.387,"reactivePower":0.0,"apparentPower":2663.147,"cosfi":99,"quadrant":0,"phaseshift":0.0,"phaseDiff":0.0},{"current":1.074 ,"activePower":187.665,"reactivePower":165.002,"apparentPower":249.888,"cosfi":74,"quadrant":0,"phaseshift":0.0,"phaseDiff":0.0}]}
+```
+
 
 ## License
 
