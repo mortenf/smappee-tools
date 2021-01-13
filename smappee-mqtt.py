@@ -16,7 +16,9 @@ class SmappeeMQTT():
         self.host = cfg.get("mqtt", "hostname")
         self.port = eval(cfg.get("mqtt", "port"))
         self.topic = cfg.get("mqtt", "topic")
+        self.topic_json = cfg.get("mqtt", "topic_json")
         self.qos = eval(cfg.get("mqtt", "qos"))
+        self.delay = eval(cfg.get("mqtt", "delay"))
         self.retain = eval(cfg.get("mqtt", "retain"))
         if eval(cfg.get("mqtt", "auth")):
             self.auth = { "username": cfg.get("mqtt", "user"), "password": cfg.get("mqtt", "password") }
@@ -38,14 +40,39 @@ class SmappeeMQTT():
                 if last != now:
                     last = now
                     break
-                sleep(0.1)
+                sleep(self.delay)
             try:
+                phaseCounter = 0
                 response = requests.get("http://"+self.smappee+"/gateway/apipublic/reportInstantaneousValues")
                 report = response.json()["report"]
-                payload = "time="+str(datetime.datetime.utcnow()).replace(" ","T")+"Z"
+                payload = "time:"+str(datetime.datetime.utcnow()).replace(" ","T")+"Z"
+                payloadJ = "\"time\":\""+str(datetime.datetime.utcnow()).replace(" ","T")+"Z\""
                 for line in re.findall(reline, report):
                     for field in re.split(refield, line):
-                        payload += ","+field
+                        payload += ",\""+field
+                        payloadJ += ",\""+field
+                        if "voltage" in field: #ugly hack to create array objects in jsonresponse..
+                            payloadJ += ",\"phase\": [{"
+                        if "phaseDiff" in field:
+                            phaseCounter = phaseCounter + 1
+                            if phaseCounter < 3:
+                                payloadJ += "},{"
+
+                #old version
+                JsonPayload = "{\"elmaalerObject\": {" + payloadJ + "}]}}"
+                #new version, not using the elmaalerObject. Change to make a simpler structure
+                #JsonPayload = "{" + payloadJ + "}]}"
+                JsonPayload = JsonPayload.replace("=","\":")
+                JsonPayload = JsonPayload.replace(" Vrms","")
+                JsonPayload = JsonPayload.replace("A","")
+                JsonPayload = JsonPayload.replace(" W","")
+                JsonPayload = JsonPayload.replace(" V","")
+                JsonPayload = JsonPayload.replace(",\"cu","\"cu")
+                JsonPayload = JsonPayload.replace(" var","")
+
+                msgs = [ { "topic": self.topic_json, "payload": JsonPayload, "qos": self.qos, "retain": self.retain } ]
+                publish.multiple(msgs, hostname=self.host, port=self.port, client_id=self.client_id, auth=self.auth)
+
                 msgs = [ { "topic": self.topic, "payload": payload, "qos": self.qos, "retain": self.retain } ]
                 publish.multiple(msgs, hostname=self.host, port=self.port, client_id=self.client_id, auth=self.auth)
             except Exception, e:
@@ -60,6 +87,7 @@ def main(argv=None):
     handler = logging.FileHandler("/var/log/smappee-mqtt.log")
     handler.setFormatter(formatter)
     logger.addHandler(handler)
+    logger.info("calling with param: " + argv[1]);
     daemon_runner = runner.DaemonRunner(daemon)
     daemon_runner.daemon_context.files_preserve=[handler.stream]
     daemon_runner.do_action()
